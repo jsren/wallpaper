@@ -1,6 +1,6 @@
 ﻿/* Wallpaper.cs - (c) James S Renwick 2014
  * ---------------------------------------
- * Version 1.0.0
+ * Version 1.0.1
  * 
  * P/invoke wrapper for getting/setting current
  * desktop background (wallpaper.)
@@ -77,6 +77,9 @@ namespace Win32.Desktop
             if (!File.Exists(filepath))
                 throw new FileNotFoundException("Invalid filepath specified for wallpaper");
 
+            // Get full path to file
+            filepath = Path.GetFullPath(filepath);
+
             if (copy)
             {
                 string tmpFile = Path.GetTempFileName();
@@ -85,10 +88,11 @@ namespace Win32.Desktop
                 File.Copy(filepath, (filepath = tmpFile), true);
             }
 
-            var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
-
-            key.SetValue("WallpaperStyle", ((int)sizing).ToString());
-            key.SetValue("TileWallpaper",  sizing == PicturePosition.Tile ? "1" : "0");
+            using (var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true))
+            {
+                key.SetValue("WallpaperStyle", ((int)sizing).ToString());
+                key.SetValue("TileWallpaper", sizing == PicturePosition.Tile ? "1" : "0");
+            }
 
             int res = SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, filepath,
                 SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
@@ -116,15 +120,14 @@ namespace Win32.Desktop
         /// <returns>The sizing of the current desktop background image.</returns>
         public static PicturePosition GetWallpaperPosition()
         {
-            var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true);
-
-            if ((string)key.GetValue("TileWallpaper") == "1")
+            using (var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop", true))
             {
-                return PicturePosition.Tile;
-            }
-            else
-            {
-                return (PicturePosition)int.Parse((string)key.GetValue("WallpaperStyle"));
+                if ((string)key.GetValue("TileWallpaper") == "1") {
+                    return PicturePosition.Tile;
+                }
+                else {
+                    return (PicturePosition)int.Parse((string)key.GetValue("WallpaperStyle"));
+                }
             }
         }
 

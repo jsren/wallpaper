@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wallpaper", "wallpaper.csproj", "{ED3B14BD-4A37-4237-94C7-9B500514DB46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wallpaperw", "wallpaperw.csproj", "{0FF5A991-E976-4267-9CE1-EBF3B3B5EF99}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ED3B14BD-4A37-4237-94C7-9B500514DB46} = {ED3B14BD-4A37-4237-94C7-9B500514DB46}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +18,10 @@ Global
 		{ED3B14BD-4A37-4237-94C7-9B500514DB46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED3B14BD-4A37-4237-94C7-9B500514DB46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED3B14BD-4A37-4237-94C7-9B500514DB46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FF5A991-E976-4267-9CE1-EBF3B3B5EF99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FF5A991-E976-4267-9CE1-EBF3B3B5EF99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FF5A991-E976-4267-9CE1-EBF3B3B5EF99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FF5A991-E976-4267-9CE1-EBF3B3B5EF99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
