@@ -1,6 +1,6 @@
 ﻿/* Wallpaper.cs - (c) James S Renwick 2014
  * ---------------------------------------
- * Version 1.0.1
+ * Version 1.1.0
  * 
  * P/invoke wrapper for getting/setting current
  * desktop background (wallpaper.)
@@ -8,6 +8,7 @@
 using Microsoft.Win32;
 using System.IO;
 using System.Runtime.InteropServices;
+using System;
 
 namespace Win32.Desktop
 {
@@ -100,11 +101,68 @@ namespace Win32.Desktop
             if (res < 0) throw new ExternalException("Error setting desktop background", res);
         }
 
-        /// <summary>
-        /// Gets a path to the current desktop background image.
-        /// </summary>
-        /// <returns>A path to the current desktop background image.</returns>
-        public static string GetWallpaperFilepath()
+		/// <summary>
+		/// Sets the system login (startup) background to a copy of the given JPEG image.
+		/// The image must be less than 244KiB.
+		/// </summary>
+		/// <param name="filepath">The path to the JPEG to set as the login background.</param>
+		public static void SetLoginBG(string filepath)
+		{
+			string bgDefaultPath = Environment.GetFolderPath(Environment.SpecialFolder.System)
+				+ @"\oobe\info\backgrounds\backgroundDefault.jpg";
+
+			// Create dir if not already existing
+			Directory.CreateDirectory(Path.GetDirectoryName(bgDefaultPath));
+
+			// Reject image if too large or wrong format
+			// TODO: Resize image?
+			var fileInfo = new FileInfo(filepath);
+
+            if (fileInfo.Length > 244 * 1024)
+				Wallpaper.Program.errorOut("Image filesize must be less than 244KiB to set as login background.");
+
+			// TODO: Check format properly? Convert image?
+			if (fileInfo.Extension != ".jpg")
+				Wallpaper.Program.errorOut("Image must be in JPEG (JFIF) format to set as login background.");
+
+			File.Copy(filepath, bgDefaultPath, true);
+
+			using (var key = Registry.LocalMachine.CreateSubKey(
+					@"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\Background", RegistryKeyPermissionCheck.ReadWriteSubTree))
+			{
+				key.SetValue("OEMBackground", 1);
+            }
+		}
+
+
+		/// <summary>
+		/// Gets a path to the current system login (startup) background image. Returns null
+		/// if using default image.
+		/// </summary>
+		public static string GetLoginBGFilepath()
+		{
+			string bgDefaultPath = Environment.GetFolderPath(Environment.SpecialFolder.System)
+				+ @"\oobe\info\backgrounds\backgroundDefault.jpg";
+
+            var key = Registry.LocalMachine.OpenSubKey(
+				@"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\Background", false);
+
+			if (key == null) return null;
+
+			using (key)
+			{
+				object value = key.GetValue("OEMBackground");
+				if (value == null || (int)value == 0) return null;
+			}
+			return File.Exists(bgDefaultPath) ? Path.GetFullPath(bgDefaultPath) : null;
+		}
+
+
+		/// <summary>
+		/// Gets a path to the current desktop background image.
+		/// </summary>
+		/// <returns>A path to the current desktop background image.</returns>
+		public static string GetWallpaperFilepath()
         {
             string filepath = new string('\0', maxPathLength);
 

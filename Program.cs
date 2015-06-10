@@ -1,6 +1,6 @@
 ﻿/* Program.cs - (c) James S Renwick 2014
  * -------------------------------------
- * Version 1.2.0
+ * Version 1.3.0
  * 
  * Quick and dirty CLI for reporting and
  * changing the current user's wallpaper.
@@ -28,14 +28,16 @@ namespace Wallpaper
             Console.WriteLine(@"
 Windows Wallpaper Utility
 =========================
-(c) James S Renwick 2014
+(c) James S Renwick 2015
 
 usage:
     wallpaper                         Prints details of the current wallpaper.
     wallpaper /?                      Prints this help message.
     wallpaper /endshow                Ends the current slideshow.
     wallpaper /next                   Advances the current slideshow.
-    wallpaper <path> [<options>]      Sets the wallpaper to a copy of the image
+	wallpaper /login <path>           Sets the login background to a copy of the
+                                      image at the path <path>.
+    wallpaper <path> [<options>]      Sets the wallpaper to a copy of the JPEG image
                                       at the path <path>.
 
 options:
@@ -66,7 +68,9 @@ options:
                     Console.WriteLine("Current Wallpaper ");
                     Console.WriteLine("\t Filepath: \"{0}\"", WallpaperInterop.GetWallpaperFilepath());
                     Console.WriteLine("\t Position: {0}",     WallpaperInterop.GetWallpaperPosition());
-                }
+					Console.WriteLine("Current login background ");
+					Console.WriteLine("\t Filepath: \"{0}\"", WallpaperInterop.GetLoginBGFilepath());
+				}
                 // Output usage info
                 else if (args.Contains("/?")) {
                     Program.printUsage();
@@ -80,6 +84,11 @@ options:
                 {
                     SlideshowHelper.CancelSlideshow();
                 }
+				else if (args[0] == "/login")
+				{
+					if (args.Length == 1) Program.errorOut("Expected path for option '/login'");
+                    WallpaperInterop.SetLoginBG(args[1]);
+				}
                 // Perform wallpaper change
                 else
                 {
